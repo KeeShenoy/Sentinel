@@ -1,3 +1,5 @@
+const pool = require("./db");
+
 const express = require("express");
 
 const app = express();
@@ -75,6 +77,17 @@ app.get("/college", (req, res) => {
     };
 
     res.json(college);
+
+});
+
+pool.query("SELECT NOW()", (err, result) => {
+
+    if (err) {
+        console.error("Database connection failed.");
+    } else {
+        console.log("Database connected!");
+        console.log(result.rows[0]);
+    }
 
 });
 
