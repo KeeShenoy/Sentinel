@@ -4,6 +4,8 @@ const express = require("express");
 
 const app = express();
 
+app.use(express.json());
+
 const PORT = 3000;
 
 app.get("/health", (req, res) => {
@@ -45,29 +47,8 @@ app.get("/apis", (req, res) => {
 
 });
 
-app.get("/users", (req, res) => {
-
-    const users = [
-        {
-            id: 1,
-            name: "Keerthana",
-            role: "Admin"
-        },
-        {
-            id: 2,
-            name: "Rahul",
-            role: "Developer"
-        },
-        {
-            id: 3,
-            name: "Aditi",
-            role: "Consumer"
-        }
-    ];
-
-    res.json(users);
-
-});
+const userRoutes = require("./routes/users");
+app.use("/users", userRoutes);
 
 app.get("/college", (req, res) => {
 
