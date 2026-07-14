@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
+const bcrypt = require("bcrypt");
+
+const authenticateToken = require("../middleware/auth");
+
 const pool = require("../db");
 
 router.get("/", async (req, res) => {
@@ -8,7 +12,7 @@ router.get("/", async (req, res) => {
     try {
 
         const result = await pool.query(
-            "SELECT * FROM users"
+            "SELECT id, name, email, role FROM users"
         );
 
         res.json(result.rows);
@@ -27,17 +31,19 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
 
-    const { name, email, role } = req.body;
+    const { name, email, role, password } = req.body;
 
     try {
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const result = await pool.query(
 
-            `INSERT INTO users(name,email,role)
-             VALUES($1,$2,$3)
-             RETURNING *`,
+            `INSERT INTO users(name, email, role, password)
+             VALUES($1, $2, $3, $4)
+             RETURNING id, name, email, role`,
 
-            [name, email, role]
+            [name, email, role, hashedPassword]
 
         );
 
@@ -54,5 +60,25 @@ router.post("/", async (req, res) => {
     }
 
 });
+
+router.get(
+
+    "/profile",
+
+    authenticateToken,
+
+    (req, res) => {
+
+        res.json({
+
+            message: "Protected Route",
+
+            user: req.user
+
+        });
+
+    }
+
+);
 
 module.exports = router;

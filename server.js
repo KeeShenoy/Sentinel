@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const pool = require("./db");
 
 const express = require("express");
@@ -49,6 +51,9 @@ app.get("/apis", (req, res) => {
 
 const userRoutes = require("./routes/users");
 app.use("/users", userRoutes);
+
+const authRoutes = require("./routes/auth");
+app.use("/auth", authRoutes);
 
 app.get("/college", (req, res) => {
 
