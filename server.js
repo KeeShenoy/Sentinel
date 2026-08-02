@@ -1,13 +1,8 @@
 require("dotenv").config();
-
 const pool = require("./db");
-
 const express = require("express");
-
 const app = express();
-
 app.use(express.json());
-
 const PORT = 3000;
 
 app.get("/health", (req, res) => {
@@ -25,29 +20,29 @@ app.get("/health", (req, res) => {
 
 });
 
-app.get("/apis", (req, res) => {
+// app.get("/apis", (req, res) => {
 
-    const apis = [
-        {
-            id: 1,
-            name: "Payments API",
-            owner: "Finance Team"
-        },
-        {
-            id: 2,
-            name: "Orders API",
-            owner: "Commerce Team"
-        },
-        {
-            id: 3,
-            name: "Analytics API",
-            owner: "Data Team"
-        }
-    ];
+//     const apis = [
+//         {
+//             id: 1,
+//             name: "Payments API",
+//             owner: "Finance Team"
+//         },
+//         {
+//             id: 2,
+//             name: "Orders API",
+//             owner: "Commerce Team"
+//         },
+//         {
+//             id: 3,
+//             name: "Analytics API",
+//             owner: "Data Team"
+//         }
+//     ];
 
-    res.json(apis);
+//     res.json(apis);
 
-});
+// });
 
 const userRoutes = require("./routes/users");
 app.use("/users", userRoutes);
@@ -55,16 +50,19 @@ app.use("/users", userRoutes);
 const authRoutes = require("./routes/auth");
 app.use("/auth", authRoutes);
 
-app.get("/college", (req, res) => {
+// app.get("/college", (req, res) => {
 
-    const college = {
-        name: "NMAMIT",
-        location: "Nitte"
-    };
+//     const college = {
+//         name: "NMAMIT",
+//         location: "Nitte"
+//     };
 
-    res.json(college);
+//     res.json(college);
 
-});
+// });
+
+const apiRoutes = require("./routes/apis");
+app.use("/apis", apiRoutes);
 
 pool.query("SELECT NOW()", (err, result) => {
 

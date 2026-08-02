@@ -14,19 +14,21 @@ function authenticateToken(req, res, next) {
 
     const token = authHeader.split(" ")[1];
 
-    jwt.verify(token, SECRET_KEY, (err, user) => {
+jwt.verify(token, SECRET_KEY, (err, user) => {
 
-        if (err) {
+    if (err) {
 
-            return res.sendStatus(403);
+        return res.sendStatus(403);
 
-        }
+    }
 
-        req.user = user;
+    console.log("Decoded JWT:", user);
 
-        next();
+    req.user = user;
 
-    });
+    next();
+
+});
 
 }
 
