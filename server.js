@@ -1,9 +1,24 @@
 require("dotenv").config();
-const pool = require("./db");
 const express = require("express");
+
+const pool = require("./db");
+const redisClient = require("./redis");
+
+const rateLimiter = require("./middleware/rateLimiter");
+
+
+const userRoutes = require("./routes/users");
+const authRoutes = require("./routes/auth");
+const apiRoutes = require("./routes/apis");
+const accessRoutes = require("./routes/access");
+
+
 const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
-const PORT = 3000;
+app.use(rateLimiter);
+
 
 app.get("/health", (req, res) => {
 
@@ -19,6 +34,45 @@ app.get("/health", (req, res) => {
     });
 
 });
+
+app.use("/users", userRoutes);
+app.use("/auth", authRoutes);
+app.use("/apis", apiRoutes);
+app.use("/access", accessRoutes);
+
+
+
+async function startServer() {
+
+    try 
+    {
+        await pool.query("SELECT NOW()");
+        console.log("Database connected!");
+
+        await redisClient.connect();
+        console.log("Redis Connected!");
+
+        app.listen(PORT, () => {
+        console.log(
+            `Server running on http://localhost:${PORT}`
+        );
+        });
+    }
+
+    catch (error) {
+        console.error("Failed to start server:");
+        console.error(error);
+    }
+
+}
+
+startServer();
+
+
+
+
+
+
 
 // app.get("/apis", (req, res) => {
 
@@ -44,11 +98,7 @@ app.get("/health", (req, res) => {
 
 // });
 
-const userRoutes = require("./routes/users");
-app.use("/users", userRoutes);
 
-const authRoutes = require("./routes/auth");
-app.use("/auth", authRoutes);
 
 // app.get("/college", (req, res) => {
 
@@ -61,20 +111,8 @@ app.use("/auth", authRoutes);
 
 // });
 
-const apiRoutes = require("./routes/apis");
-app.use("/apis", apiRoutes);
 
-pool.query("SELECT NOW()", (err, result) => {
+// app.listen(PORT, () => {
+//     console.log(`Server is running on http://localhost:${PORT}`);
+// });
 
-    if (err) {
-        console.error("Database connection failed.");
-    } else {
-        console.log("Database connected!");
-        console.log(result.rows[0]);
-    }
-
-});
-
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});

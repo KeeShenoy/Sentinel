@@ -37,14 +37,29 @@ router.post(
     async (req, res) => {
 
         const {
-
             name,
             description,
-            owner,
             version
         } = req.body;
 
         try {
+            const adminResult = await pool.query(
+
+                `SELECT name
+                 FROM users
+                 WHERE id = $1`,
+                [req.user.id]
+
+            );
+
+            if (adminResult.rows.length === 0) {
+
+                return res.status(404).json({
+                    message: "Admin not found"
+                });
+            }
+
+            const owner = adminResult.rows[0].name;
 
             const result = await pool.query(
 
@@ -64,12 +79,12 @@ router.post(
             res.status(201).json(result.rows[0]);
         }
 
-        catch(error){
+        catch (error) {
 
             console.error(error);
             res.status(500).json({
 
-                message:"Database Error"
+                message: "Database Error"
 
             });
         }
