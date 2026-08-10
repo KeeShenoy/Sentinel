@@ -19,6 +19,11 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(rateLimiter);
 
+const logger = require("./middleware/logger");
+app.use(logger);
+
+const analyticsRoutes = require("./routes/analytics");
+app.use("/analytics", analyticsRoutes);
 
 app.get("/health", (req, res) => {
 
@@ -39,7 +44,6 @@ app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/apis", apiRoutes);
 app.use("/access", accessRoutes);
-
 
 
 async function startServer() {
