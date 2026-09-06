@@ -1,0 +1,126 @@
+:root {
+  --text: #5c6370;
+  --text-h: #111827;
+  --text-muted: #9ca3af;
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --code-bg: #f3f4f6;
+  --accent: #6d28d9;
+  --accent-hover: #5b21b6;
+  --accent-bg: rgba(109, 40, 217, 0.08);
+  --accent-border: rgba(109, 40, 217, 0.25);
+  --success-bg: #ecfdf5;
+  --success-border: #a7f3d0;
+  --success-text: #065f46;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-text: #991b1b;
+  --warning-bg: #fffbeb;
+  --warning-text: #92400e;
+  --admin-bg: #ede9fe;
+  --admin-text: #5b21b6;
+  --consumer-bg: #e0f2fe;
+  --consumer-text: #0369a1;
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+  --radius: 6px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --max-width: 960px;
+
+  font: 15px/1.5 var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --text-muted: #6b7280;
+    --bg: #111318;
+    --surface: #1a1d24;
+    --border: #2e333d;
+    --border-strong: #3d4450;
+    --code-bg: #252830;
+    --accent: #a78bfa;
+    --accent-hover: #c4b5fd;
+    --accent-bg: rgba(167, 139, 250, 0.12);
+    --accent-border: rgba(167, 139, 250, 0.3);
+    --success-bg: rgba(16, 185, 129, 0.12);
+    --success-border: rgba(16, 185, 129, 0.3);
+    --success-text: #6ee7b7;
+    --error-bg: rgba(239, 68, 68, 0.12);
+    --error-border: rgba(239, 68, 68, 0.3);
+    --error-text: #fca5a5;
+    --warning-bg: rgba(245, 158, 11, 0.12);
+    --warning-text: #fcd34d;
+    --admin-bg: rgba(139, 92, 246, 0.15);
+    --admin-text: #c4b5fd;
+    --consumer-bg: rgba(56, 189, 248, 0.12);
+    --consumer-text: #7dd3fc;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+h1, h2, h3 {
+  color: var(--text-h);
+  font-weight: 600;
+  margin: 0;
+}
+
+h2 {
+  font-size: 1.125rem;
+}
+
+h3 {
+  font-size: 0.9375rem;
+  margin-bottom: 0.75rem;
+}
+
+p {
+  margin: 0;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  background: var(--code-bg);
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+  color: var(--text-h);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 0.9375rem;
+}
+
+a {
+  color: var(--accent);
+}

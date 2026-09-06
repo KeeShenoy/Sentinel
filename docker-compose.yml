@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports: ["5433:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./backup/trustmesh_backup.sql:/docker-entrypoint-initdb.d/trustmesh_backup.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  backend:
+    build: .
+    ports: ["3000:3000"]
+    environment: &sentinel_env
+      DB_USER: ${DB_USER}
+      DB_HOST: postgres
+      DB_NAME: ${DB_NAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  demo-api:
+    build: .
+    command: node demo-api/server.js
+    environment: { PORT: 4000 }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  gateway-1:
+    build: .
+    command: node gateway/server.js
+    ports: ["4001:4001"]
+    environment:
+      <<: *sentinel_env
+      GATEWAY_PORT: 4001
+    depends_on:
+      backend: { condition: service_healthy }
+      demo-api: { condition: service_healthy }
+  gateway-2:
+    build: .
+    command: node gateway/server.js
+    ports: ["4002:4002"]
+    environment:
+      <<: *sentinel_env
+      GATEWAY_PORT: 4002
+    depends_on:
+      backend: { condition: service_healthy }
+      demo-api: { condition: service_healthy }
+volumes:
+  postgres_data:

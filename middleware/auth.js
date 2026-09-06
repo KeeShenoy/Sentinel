@@ -1,35 +1,18 @@
 const jwt = require("jsonwebtoken");
-
 const SECRET_KEY = process.env.JWT_SECRET;
 
 function authenticateToken(req, res, next) {
+  const header = req.headers.authorization;
 
-    const authHeader = req.headers.authorization;
+  if (!header) return res.sendStatus(401);
 
-    if (!authHeader) {
+  const token = header.split(" ")[1];
+  if (!token) return res.sendStatus(401);
 
-        return res.sendStatus(401);
-
-    }
-
-    const token = authHeader.split(" ")[1];
-
-jwt.verify(token, SECRET_KEY, (err, user) => {
-
-    if (err) {
-
-        return res.sendStatus(403);
-
-    }
-
-    console.log("Decoded JWT:", user);
-
+  jwt.verify(token, SECRET_KEY, (err, user) => {
+    if (err) return res.sendStatus(403);
     req.user = user;
-
     next();
-
-});
-
+  });
 }
-
 module.exports = authenticateToken;

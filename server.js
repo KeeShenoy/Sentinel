@@ -1,122 +1,44 @@
 require("dotenv").config();
-const express = require("express");
-
-const pool = require("./db");
-const redisClient = require("./redis");
-
-const rateLimiter = require("./middleware/rateLimiter");
-
-
-const userRoutes = require("./routes/users");
-const authRoutes = require("./routes/auth");
-const apiRoutes = require("./routes/apis");
-const accessRoutes = require("./routes/access");
-
-
+const express = require("express"),
+  cors = require("cors"),
+  pool = require("./db"),
+  redis = require("./redis"),
+  runMigrations = require("./migrations/run");
 const app = express();
-const PORT = process.env.PORT || 3000;
-
+app.use(cors());
 app.use(express.json());
-app.use(rateLimiter);
-
-const logger = require("./middleware/logger");
-app.use(logger);
-
-const analyticsRoutes = require("./routes/analytics");
-app.use("/analytics", analyticsRoutes);
-
-app.get("/health", (req, res) => {
-
-    console.log("Health endpoint was called.");
-
-    res.json({
-        success: true,
-        status: "healthy",
-        project: "TrustMesh Lite",
-        version: "1.0.0",
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString()
-    });
-
+app.use(require("./middleware/rateLimiter"));
+app.use(require("./middleware/logger"));
+app.get("/health", async (_req, res) =>
+  res.json({
+    success: true,
+    status: "healthy",
+    project: "Sentinel",
+    version: "2.0.0",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  }),
+);
+app.use("/auth", require("./routes/auth"));
+app.use("/users", require("./routes/users"));
+app.use("/apis", require("./routes/apis"));
+app.use("/access", require("./routes/access"));
+app.use("/analytics", require("./routes/analytics"));
+app.use("/policies", require("./routes/policies"));
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(500).json({ message: "Server error" });
 });
-
-app.use("/users", userRoutes);
-app.use("/auth", authRoutes);
-app.use("/apis", apiRoutes);
-app.use("/access", accessRoutes);
-
-
-async function startServer() {
-
-    try 
-    {
-        await pool.query("SELECT NOW()");
-        console.log("Database connected!");
-
-        await redisClient.connect();
-        console.log("Redis Connected!");
-
-        app.listen(PORT, () => {
-        console.log(
-            `Server running on http://localhost:${PORT}`
-        );
-        });
-    }
-
-    catch (error) {
-        console.error("Failed to start server:");
-        console.error(error);
-    }
-
+async function start() {
+  try {
+    await pool.query("SELECT NOW()");
+    await runMigrations();
+    if (!redis.isOpen) await redis.connect();
+    app.listen(process.env.PORT || 3000, () =>
+      console.log("Sentinel control plane listening"),
+    );
+  } catch (e) {
+    console.error("Failed to start server:", e);
+  }
 }
-
-startServer();
-
-
-
-
-
-
-
-// app.get("/apis", (req, res) => {
-
-//     const apis = [
-//         {
-//             id: 1,
-//             name: "Payments API",
-//             owner: "Finance Team"
-//         },
-//         {
-//             id: 2,
-//             name: "Orders API",
-//             owner: "Commerce Team"
-//         },
-//         {
-//             id: 3,
-//             name: "Analytics API",
-//             owner: "Data Team"
-//         }
-//     ];
-
-//     res.json(apis);
-
-// });
-
-
-
-// app.get("/college", (req, res) => {
-
-//     const college = {
-//         name: "NMAMIT",
-//         location: "Nitte"
-//     };
-
-//     res.json(college);
-
-// });
-
-
-// app.listen(PORT, () => {
-//     console.log(`Server is running on http://localhost:${PORT}`);
-// });
-
+start();
